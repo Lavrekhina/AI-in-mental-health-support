@@ -35,6 +35,12 @@ python -m analysis.03_shifts_transitions_risk
 python -m analysis.04_build_story
 ```
 
+- **Export to HTML** (writes `outputs/story.html`, embedding figures + interactive charts):
+
+```bash
+python -m analysis.05_export_html
+```
+
 ### Project structure
 
 - `AI_mental_health_interactions.csv`: raw input dataset (provided externally).
