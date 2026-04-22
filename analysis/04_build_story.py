@@ -64,6 +64,7 @@ def main() -> None:
     metrics_path = outputs / "metrics_step02.csv"
     risk_proxy_path = outputs / "risk_groups_step03_PROXY.csv"
     risk_obs_path = outputs / "risk_groups_step03.csv"
+    step03_notes = outputs / "step03_notes.txt"
 
     metrics = _read_sectioned_csv(metrics_path) if metrics_path.exists() else {}
     emotion_tbl = metrics.get("Emotion prevalence")
@@ -88,6 +89,25 @@ def main() -> None:
                 float(r.get("uplift_vs_neutral", float("nan"))),
                 int(r["count"]),
             )
+
+    # If after-sentiment exists (or a proxy column is present), compute mean delta by response style.
+    delta_by_response_md = None
+    after_col = None
+    if "Sentiment_score_after" in df.columns:
+        after_col = "Sentiment_score_after"
+    elif "Sentiment_score_after_proxy" in df.columns:
+        after_col = "Sentiment_score_after_proxy"
+
+    if after_col is not None and {"AI_response_classification", "Sentiment_score", after_col}.issubset(df.columns):
+        tmp = df[["AI_response_classification", "Sentiment_score", after_col]].dropna().copy()
+        tmp["delta"] = tmp[after_col] - tmp["Sentiment_score"]
+        delta_tbl = (
+            tmp.groupby("AI_response_classification")["delta"]
+            .agg(["mean", "median", "count"])
+            .reset_index()
+            .sort_values("mean")
+        )
+        delta_by_response_md = delta_tbl.to_markdown(index=False)
 
     # Story markdown
     story_path = outputs / "story.md"
@@ -134,6 +154,14 @@ def main() -> None:
     )
     lines.append("- Observed: `outputs/figures/sentiment_before_after_by_response.png`\n")
     lines.append("- Proxy: `outputs/figures/sentiment_before_after_by_response_PROXY.png`\n")
+    if delta_by_response_md is not None:
+        lines.append("Average sentiment change (after − before) by response type:\n")
+        lines.append(delta_by_response_md)
+        lines.append("\n")
+    else:
+        lines.append(
+            "A response-style delta table is available when `Sentiment_score_after` (or proxy after-sentiment) is present.\n"
+        )
 
     lines.append("### 4) Which age groups show the biggest emotional shifts?\n")
     lines.append("- Observed: `outputs/figures/agegroup_sentiment_shift.png`\n")
@@ -166,11 +194,53 @@ def main() -> None:
     else:
         lines.append("Risk group table not found (run step 3).\n")
 
+    lines.append("### Limitations & ethics (important)\n")
+    lines.append(
+        "- **Not clinical outcomes**: sentiment and “returned / dropped / escalated” are proxies, not diagnoses or treatment success.\n"
+        "- **Proxy vs observed**: if your CSV lacks `Sentiment_score_after`, the project can run a **proxy** after-sentiment for demonstration. "
+        "For final conclusions, prefer the **observed** after-columns.\n"
+        "- **Aggregation first**: “at‑risk groups” are computed at group level (age × response × emotion), not individuals.\n"
+        "- **Ethical emphasis**: extreme-negative visual highlights a statistical tail (lowest 5%) without labels to reduce stigma.\n"
+    )
+    if step03_notes.exists():
+        lines.append(f"Run mode details: `{step03_notes.as_posix()}`\n")
+
+    # Checklist of required artifacts (helps verify completeness before submission)
+    expected = [
+        "outputs/figures/emotion_prevalence_bar.png",
+        "outputs/figures/emotion_wordcloud.png",
+        "outputs/figures/followup_by_response_stacked.png",
+        "outputs/figures/followup_by_response_interactive.html",
+        "outputs/figures/sentiment_before_after_by_response.png",
+        "outputs/figures/sentiment_before_after_by_response_PROXY.png",
+        "outputs/figures/emotion_transition_sankey.html",
+        "outputs/figures/emotion_transition_sankey_PROXY.html",
+        "outputs/figures/extreme_negative_sentiment_scatter.png",
+        "outputs/figures/agegroup_sentiment_shift.png",
+        "outputs/figures/agegroup_sentiment_shift_PROXY.png",
+    ]
+    missing = [p for p in expected if not (repo_root / p).exists()]
+    checklist_path = outputs / "story_checklist.txt"
+    checklist_path.write_text(
+        "Required artifacts checklist\n"
+        + "\n".join([f"[{'x' if (repo_root/p).exists() else ' '}] {p}" for p in expected])
+        + "\n",
+        encoding="utf-8",
+    )
+    lines.append("### Submission checklist\n")
+    lines.append(f"- Generated checklist: `{checklist_path.as_posix()}`\n")
+    if missing:
+        lines.append("Missing artifacts right now (run the relevant steps to generate them):\n")
+        lines.extend([f"- `{p}`\n" for p in missing])
+    else:
+        lines.append("All expected artifacts are present.\n")
+
     lines.append("### Appendix: full reproducible code\n")
     lines.append("- `analysis/01_data_overview.py`\n")
     lines.append("- `analysis/02_emotions_and_followup.py`\n")
     lines.append("- `analysis/03_shifts_transitions_risk.py`\n")
     lines.append("- `analysis/04_build_story.py`\n")
+    lines.append("- `analysis/05_export_html.py`\n")
     lines.append("- `src/aihms/data.py`, `src/aihms/viz.py`\n")
 
     story_path.write_text("\n".join(lines).strip() + "\n", encoding="utf-8")
