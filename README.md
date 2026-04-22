@@ -47,6 +47,12 @@ python -m analysis.05_export_html
 python -m analysis.00_run_all
 ```
 
+- **Export full-code appendix** (writes `outputs/appendix_code.md`):
+
+```bash
+python -m analysis.06_export_appendix
+```
+
 ### Project structure
 
 - `AI_mental_health_interactions.csv`: raw input dataset (provided externally).
