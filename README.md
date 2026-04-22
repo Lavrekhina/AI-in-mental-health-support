@@ -41,6 +41,12 @@ python -m analysis.04_build_story
 python -m analysis.05_export_html
 ```
 
+- **Run everything end-to-end** (recommended for final regeneration):
+
+```bash
+python -m analysis.00_run_all
+```
+
 ### Project structure
 
 - `AI_mental_health_interactions.csv`: raw input dataset (provided externally).
