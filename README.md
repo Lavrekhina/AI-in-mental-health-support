@@ -65,3 +65,16 @@ python -m analysis.06_export_appendix
 - The code is written to be **schema-tolerant**: if your dataset version includes extra columns
   for "after" emotion/sentiment (e.g., `Sentiment_score_after`), the loader keeps them and downstream
   steps will use them when available.
+
+### Troubleshooting
+
+- **If Python crashes with an OpenMP error** like `OMP: Error #178 ... Can't open SHM2` when importing `pandas/numpy`:
+
+```bash
+export KMP_DISABLE_SHM=1
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+```
+
+Then rerun the command (e.g., `python -m analysis.00_run_all`). If it still happens, try running inside a fresh venv
+(`python -m venv .venv && source .venv/bin/activate`) and reinstalling requirements.
