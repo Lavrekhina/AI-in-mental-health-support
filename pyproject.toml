@@ -1,0 +1,16 @@
+[project]
+name = "aihms"
+version = "0.1.0"
+description = "AI in mental health support — mini-project analysis utilities"
+requires-python = ">=3.9"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
