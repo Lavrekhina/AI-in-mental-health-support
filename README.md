@@ -17,6 +17,12 @@ pip install -r requirements.txt
 python -m analysis.01_data_overview
 ```
 
+- **Run step 2** (emotion prevalence + wordcloud + response-vs-followup plots):
+
+```bash
+python -m analysis.02_emotions_and_followup
+```
+
 ### Project structure
 
 - `AI_mental_health_interactions.csv`: raw input dataset (provided externally).
