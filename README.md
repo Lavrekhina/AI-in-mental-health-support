@@ -29,6 +29,12 @@ python -m analysis.02_emotions_and_followup
 python -m analysis.03_shifts_transitions_risk
 ```
 
+- **Build the story artifact** (writes `outputs/story.md`):
+
+```bash
+python -m analysis.04_build_story
+```
+
 ### Project structure
 
 - `AI_mental_health_interactions.csv`: raw input dataset (provided externally).
