@@ -23,6 +23,12 @@ python -m analysis.01_data_overview
 python -m analysis.02_emotions_and_followup
 ```
 
+- **Run step 3** (before/after sentiment, emotion transitions, age-group shifts, at-risk group table):
+
+```bash
+python -m analysis.03_shifts_transitions_risk
+```
+
 ### Project structure
 
 - `AI_mental_health_interactions.csv`: raw input dataset (provided externally).
