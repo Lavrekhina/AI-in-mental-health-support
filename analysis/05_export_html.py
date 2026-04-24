@@ -61,10 +61,12 @@ def _inject_embeds(repo_root: Path, html: str) -> str:
     for p in candidates:
         if not p.exists():
             continue
-        rel = _resolve_output_path(repo_root, p)
-        marker = f"<code>{rel}</code>"
+        rel_repo = _resolve_output_path(repo_root, p)
+        # story.html lives in outputs/, so use paths relative to outputs/
+        rel_out = rel_repo.replace("outputs/", "", 1) if rel_repo.startswith("outputs/") else rel_repo
+        marker = f"<code>{rel_repo}</code>"
         if marker in html:
-            iframe = f'<div style="margin:12px 0;"><iframe class="embed" src="{rel}"></iframe></div>'
+            iframe = f'<div style="margin:12px 0;"><iframe class="embed" src="{rel_out}"></iframe></div>'
             html = html.replace(marker, marker + iframe)
     return html
 
@@ -79,9 +81,10 @@ def _inject_images(repo_root: Path, html: str) -> str:
     pattern = re.compile(r"<code>(outputs/figures/[^<]+?\\.png)</code>")
 
     def repl(m: re.Match[str]) -> str:
-        path = m.group(1)
-        img = f'<div style="margin:12px 0;"><img src="{path}" alt="{path}"/></div>'
-        return f"<code>{path}</code>{img}"
+        path_repo = m.group(1)  # e.g. outputs/figures/foo.png
+        path_out = path_repo.replace("outputs/", "", 1)  # figures/foo.png
+        img = f'<div style="margin:12px 0;"><img src="{path_out}" alt="{path_out}"/></div>'
+        return f"<code>{path_repo}</code>{img}"
 
     return pattern.sub(repl, html)
 

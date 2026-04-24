@@ -1,80 +1,51 @@
-## AI in mental health support — data story (Mini-project #2)
+## AI in mental health support data story mini project 2
 
-This repository contains a reproducible Python analysis + visual data story based on
-`AI_mental_health_interactions.csv` (anonymized interactions with an AI mental-health support assistant).
+This repo contains a reproducible Python analysis and a visual data story based on the file
+AI_mental_health_interactions.csv which contains anonymized interactions with an AI mental health support assistant
 
 ### Quickstart
 
-- **Create a virtual environment** (recommended) and install dependencies:
-
-```bash
+Install dependencies
 pip install -r requirements.txt
-```
 
-- **Run the first analysis step** (loads the dataset, normalizes labels, writes a cleaned CSV):
-
-```bash
+Run step 1 data overview and cleaned data
 python -m analysis.01_data_overview
-```
 
-- **Run step 2** (emotion prevalence + wordcloud + response-vs-followup plots):
-
-```bash
+Run step 2 emotions and follow up visuals
 python -m analysis.02_emotions_and_followup
-```
 
-- **Run step 3** (before/after sentiment, emotion transitions, age-group shifts, at-risk group table):
-
-```bash
+Run step 3 shifts transitions and risk tables
 python -m analysis.03_shifts_transitions_risk
-```
 
-- **Build the story artifact** (writes `outputs/story.md`):
-
-```bash
+Build the story markdown and the plain text version
 python -m analysis.04_build_story
-```
 
-- **Export to HTML** (writes `outputs/story.html`, embedding figures + interactive charts):
-
-```bash
+Export the story to HTML
 python -m analysis.05_export_html
-```
 
-- **Run everything end-to-end** (recommended for final regeneration):
-
-```bash
+Run everything end to end
 python -m analysis.00_run_all
-```
 
-- **Export full-code appendix** (writes `outputs/appendix_code.md`):
-
-```bash
+Export the full code appendix
 python -m analysis.06_export_appendix
-```
 
 ### Project structure
 
-- `AI_mental_health_interactions.csv`: raw input dataset (provided externally).
-- `src/aihms/`: reusable loading/cleaning utilities.
-- `analysis/`: executable analysis steps (scripts). Later steps will generate plots and the narrative story.
-- `outputs/`: generated, non-sensitive artifacts (cleaned data + figures).
+AI_mental_health_interactions.csv  input dataset
+src/aihms  reusable loading and cleaning utilities
+analysis  analysis steps that generate tables plots and narrative artifacts
+outputs  generated cleaned data figures and story files
 
 ### Notes
 
-- The code is written to be **schema-tolerant**: if your dataset version includes extra columns
-  for "after" emotion/sentiment (e.g., `Sentiment_score_after`), the loader keeps them and downstream
-  steps will use them when available.
+The code is schema tolerant
+If your dataset includes extra columns such as Sentiment_score_after or Reported_emotion_after then the later steps will use them
 
 ### Troubleshooting
 
-- **If Python crashes with an OpenMP error** like `OMP: Error #178 ... Can't open SHM2` when importing `pandas/numpy`:
-
-```bash
+If Python crashes with an OpenMP error during numpy or pandas import then set these environment variables and rerun
 export KMP_DISABLE_SHM=1
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
-```
 
-Then rerun the command (e.g., `python -m analysis.00_run_all`). If it still happens, try running inside a fresh venv
-(`python -m venv .venv && source .venv/bin/activate`) and reinstalling requirements.
+If it still fails try a fresh virtual environment and reinstall requirements

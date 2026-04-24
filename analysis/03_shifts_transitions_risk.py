@@ -105,24 +105,19 @@ def plot_before_after_sentiment_by_response(
         palette=[theme.neutral, theme.calm_secondary],
         ax=ax,
     )
-    ax.set_title("Before vs after sentiment by AI response type")
+    # Use a figure-level title + a smaller subtitle to avoid overlaps.
+    fig.suptitle("Before vs after sentiment by AI response type", y=0.98, fontsize=14, fontweight="semibold")
     ax.set_xlabel("AI response classification")
     ax.set_ylabel("Sentiment score (higher = more positive)")
-    ax.legend(title="", loc="upper left")
+    # Put legend outside the plotting area to avoid overlapping annotations.
+    ax.legend(title="", loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0)
 
     subtitle = "Observed after-sentiment from dataset" if mode == "observed" else "Proxy after-sentiment (no after-columns in CSV)"
-    ax.annotate(
-        subtitle,
-        xy=(0.01, 0.98),
-        xycoords="axes fraction",
-        ha="left",
-        va="top",
-        fontsize=10,
-        bbox=dict(boxstyle="round,pad=0.25", fc="white", ec=theme.grid),
-    )
+    ax.set_title(subtitle, loc="left", fontsize=10, pad=10)
 
     out = fig_dir / ("sentiment_before_after_by_response.png" if mode == "observed" else "sentiment_before_after_by_response_PROXY.png")
-    fig.tight_layout()
+    # Leave room on the right for the legend and on top for the suptitle.
+    fig.tight_layout(rect=(0, 0, 0.82, 0.92))
     fig.savefig(out, dpi=200)
     plt.close(fig)
     return out
