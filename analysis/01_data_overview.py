@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from analysis._bootstrap import ensure_src_on_path
+
+ensure_src_on_path()
+
 from aihms.data import load_interactions
 
 

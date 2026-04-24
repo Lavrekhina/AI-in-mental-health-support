@@ -4,6 +4,10 @@ from pathlib import Path
 
 import markdown as md
 
+from analysis._bootstrap import ensure_src_on_path
+
+ensure_src_on_path()
+
 
 CSS = """
 :root{

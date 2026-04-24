@@ -9,6 +9,10 @@ import pandas as pd
 import plotly.graph_objects as go
 import seaborn as sns
 
+from analysis._bootstrap import ensure_src_on_path
+
+ensure_src_on_path()
+
 from aihms.data import EMOTION_CANONICAL_ORDER, RESPONSE_CANONICAL_ORDER, load_interactions
 from aihms.viz import EmotionTheme, apply_mpl_theme
 

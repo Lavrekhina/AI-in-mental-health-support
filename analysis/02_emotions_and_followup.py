@@ -8,6 +8,10 @@ import plotly.express as px
 import seaborn as sns
 from wordcloud import WordCloud
 
+from analysis._bootstrap import ensure_src_on_path
+
+ensure_src_on_path()
+
 from aihms.data import (
     EMOTION_CANONICAL_ORDER,
     FOLLOWUP_CANONICAL_ORDER,

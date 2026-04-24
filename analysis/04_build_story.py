@@ -5,6 +5,10 @@ from typing import Optional
 
 import pandas as pd
 
+from analysis._bootstrap import ensure_src_on_path
+
+ensure_src_on_path()
+
 from aihms.data import load_interactions
 
 
@@ -245,6 +249,107 @@ def main() -> None:
 
     story_path.write_text("\n".join(lines).strip() + "\n", encoding="utf-8")
     print(f"Wrote {story_path.relative_to(repo_root)}")
+
+    # Also write a plain text version with fewer visual markers and without the characters the user requested.
+    # We keep story.md unchanged because step05 converts it to HTML.
+    banned_chars = {';', ':', '"', '*'}
+
+    def _clean_plain(s: str) -> str:
+        for ch in banned_chars:
+            s = s.replace(ch, "")
+        # Avoid backticks too, since they read like markup in plain text.
+        s = s.replace("`", "")
+        return s
+
+    plain_path = outputs / "story_plain.txt"
+    plain: list[str] = []
+    plain.append("AI IN MENTAL HEALTH SUPPORT  AN EMOTIONALLY ENGAGING DATA STORY\n")
+    plain.append(
+        _clean_plain(
+            "This story explores anonymized interactions between users seeking mental health support and an AI assistant. "
+            "The goal is to understand what users feel, how the AI responds, and what happens next, while keeping the tone calm and ethical.\n"
+        )
+    )
+
+    plain.append("SECTION 1  MOST COMMON EMOTIONS\n")
+    if most_common_emotion is not None:
+        emo, cnt, share = most_common_emotion
+        plain.append(_clean_plain(f"The most common emotion is {emo}. It appears in {cnt} interactions, about {_fmt_pct(share)} of the dataset.\n"))
+    else:
+        plain.append(_clean_plain("Emotion prevalence metrics were not found. Run step 2 to generate them.\n"))
+    plain.append(_clean_plain("Related visuals are saved in outputs figures emotion prevalence bar and emotion wordcloud.\n"))
+
+    plain.append("SECTION 2  EMPATHETIC RESPONSE AND FOLLOW UP\n")
+    plain.append(
+        _clean_plain(
+            "We treat follow up as whether the user returned, compared with dropping or escalating to a human. "
+            "This is a behavioral proxy and not a clinical outcome.\n"
+        )
+    )
+    if empathetic_followup is not None:
+        rate, uplift, n = empathetic_followup
+        plain.append(_clean_plain(f"For empathetic responses, the returned rate is {_fmt_pct(rate)} across {n} interactions.\n"))
+        plain.append(_clean_plain(f"Compared with neutral responses, the uplift is {_fmt_pct(uplift)}.\n"))
+    else:
+        plain.append(_clean_plain("Follow up metrics by response type were not found. Run step 2 to generate them.\n"))
+    plain.append(_clean_plain("Related visuals are saved in outputs figures followup by response stacked and the interactive html.\n"))
+
+    plain.append("SECTION 3  NEGATIVE EMOTIONAL REINFORCEMENT RISK\n")
+    plain.append(
+        _clean_plain(
+            "We compare before and after sentiment by AI response type. If the dataset includes after sentiment columns, results are observed. "
+            "Otherwise the pipeline runs a clearly labeled proxy mode.\n"
+        )
+    )
+    if delta_by_response_md is not None:
+        plain.append(_clean_plain("Average sentiment change after minus before by response type is available in the markdown story table.\n"))
+    plain.append(_clean_plain("Related visuals are saved in outputs figures sentiment before after by response.\n"))
+
+    plain.append("SECTION 4  AGE GROUP SHIFTS\n")
+    plain.append(_clean_plain("We compute average sentiment change after minus before within each age group.\n"))
+    plain.append(_clean_plain("Related visuals are saved in outputs figures agegroup sentiment shift.\n"))
+
+    plain.append("SECTION 5  EMOTION TRANSITIONS\n")
+    plain.append(
+        _clean_plain(
+            "Transitions are shown as a sankey diagram. Observed mode uses emotion before to emotion after. "
+            "Proxy mode uses sentiment buckets.\n"
+        )
+    )
+    plain.append(_clean_plain("Related visuals are saved in outputs figures emotion transition sankey html.\n"))
+
+    plain.append("SECTION 6  EXTREME NEGATIVE SENTIMENT HIGHLIGHT\n")
+    plain.append(
+        _clean_plain(
+            "We highlight the lowest five percent sentiment tail using soft markers and no labels. "
+            "This avoids singling out any interaction.\n"
+        )
+    )
+    plain.append(_clean_plain("Related visual is saved in outputs figures extreme negative sentiment scatter.\n"))
+
+    plain.append("SECTION 7  AT RISK GROUPS  AGGREGATED\n")
+    plain.append(
+        _clean_plain(
+            "At risk groups are computed only at an aggregated level using age group, response type, and emotion. "
+            "No individual labeling is done.\n"
+        )
+    )
+    if risk_path is not None:
+        plain.append(_clean_plain(f"The full table is saved in {risk_path.as_posix()}.\n"))
+    else:
+        plain.append(_clean_plain("Risk group table not found. Run step 3 to generate it.\n"))
+
+    plain.append("LIMITATIONS AND ETHICS\n")
+    plain.append(
+        _clean_plain(
+            "Sentiment scores and follow up outcomes are proxies and do not represent diagnoses or treatment success. "
+            "When after columns are missing, proxy mode is for demonstration and should not be used for strong conclusions. "
+            "All reporting should remain calm, non sensational, and privacy preserving.\n"
+        )
+    )
+
+    plain_path.write_text("".join(plain).rstrip() + "\n", encoding="utf-8")
+    print(f"Wrote {plain_path.relative_to(repo_root)}")
 
 
 if __name__ == "__main__":
