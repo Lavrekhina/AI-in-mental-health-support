@@ -83,9 +83,12 @@ def plot_emotion_prevalence(fig_dir: Path, df: pd.DataFrame, theme: EmotionTheme
     sns.barplot(
         x=counts.index,
         y=counts.values,
+        hue=counts.index,
         palette=list(theme.emotion_palette)[: len(counts)],
+        dodge=False,
         ax=ax,
     )
+    ax.legend_.remove()
     ax.set_title("What emotions are most common among users seeking help?")
     ax.set_xlabel("Reported emotion (normalized)")
     ax.set_ylabel("Number of interactions")

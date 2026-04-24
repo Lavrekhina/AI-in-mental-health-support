@@ -192,7 +192,13 @@ def main() -> None:
         lines.append(
             "Top groups by **share of high distress** (aggregated by age × response × emotion; not individuals):\n"
         )
-        lines.append(top.to_markdown(index=False))
+        try:
+            lines.append(top.to_markdown(index=False))
+        except ImportError:
+            # `to_markdown()` requires optional `tabulate`. Fall back to a plain fixed-width table.
+            lines.append("```")
+            lines.append(top.to_string(index=False))
+            lines.append("```")
         lines.append("\n")
         lines.append(f"Full table: `{risk_path.as_posix()}`\n")
     else:
