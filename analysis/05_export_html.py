@@ -126,8 +126,15 @@ def _inject_images(repo_root: Path, html: str) -> str:
 
     def repl(m: re.Match[str]) -> str:
         path_repo = m.group(1)  # e.g. outputs/figures/foo.png
+        abs_path = repo_root / path_repo
         path_out = path_repo.replace("outputs/", "", 1)  # figures/foo.png
-        img = f'<div style="margin:12px 0;"><img src="{path_out}" alt="{path_out}"/></div>'
+        if abs_path.is_file():
+            img = f'<div style="margin:12px 0;"><img src="{path_out}" alt="{path_out}"/></div>'
+        else:
+            img = (
+                f'<div class="hint" style="margin:12px 0;">Figure missing (not on disk): '
+                f'<code>{path_repo}</code> — run <code>python -m analysis.03_shifts_transitions_risk</code> after data prep.</div>'
+            )
         return f"<code>{path_repo}</code>{img}"
 
     return pattern.sub(repl, html)

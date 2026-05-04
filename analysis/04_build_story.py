@@ -50,6 +50,17 @@ def _fmt_pct(x: float) -> str:
     return f"{x*100:.1f}%"
 
 
+def _md_figure_bullet(repo_root: Path, rel_posix: str, bullet_label: str) -> str:
+    """
+    Step 05 turns backticked `outputs/figures/*.png` into <img>. Only backtick paths that exist
+    so the HTML never points at a missing file (e.g. observed PNG in a proxy-only run).
+    """
+    p = repo_root / rel_posix
+    if p.is_file():
+        return f"- {bullet_label}: `{rel_posix}`\n"
+    return f"- {bullet_label}: not generated in this run ({rel_posix}).\n"
+
+
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     outputs = repo_root / "outputs"
@@ -162,8 +173,8 @@ def main() -> None:
         "We examine **before vs after sentiment** by AI response type. "
         "If your dataset includes `Sentiment_score_after`, plots are **observed**; otherwise this project runs a clearly-labeled **proxy** mode.\n"
     )
-    lines.append("- Observed: `outputs/figures/sentiment_before_after_by_response.png`\n")
-    lines.append("- Proxy: `outputs/figures/sentiment_before_after_by_response_PROXY.png`\n")
+    lines.append(_md_figure_bullet(repo_root, "outputs/figures/sentiment_before_after_by_response.png", "Observed"))
+    lines.append(_md_figure_bullet(repo_root, "outputs/figures/sentiment_before_after_by_response_PROXY.png", "Proxy"))
     if delta_by_response_md is not None:
         lines.append("Average sentiment change (after − before) by response type:\n")
         lines.append(delta_by_response_md)
@@ -174,8 +185,8 @@ def main() -> None:
         )
 
     lines.append("### 4) Which age groups show the biggest emotional shifts?\n")
-    lines.append("- Observed: `outputs/figures/agegroup_sentiment_shift.png`\n")
-    lines.append("- Proxy: `outputs/figures/agegroup_sentiment_shift_PROXY.png`\n")
+    lines.append(_md_figure_bullet(repo_root, "outputs/figures/agegroup_sentiment_shift.png", "Observed"))
+    lines.append(_md_figure_bullet(repo_root, "outputs/figures/agegroup_sentiment_shift_PROXY.png", "Proxy"))
 
     lines.append("### 5) How do emotions transition after the AI reply?\n")
     lines.append(
