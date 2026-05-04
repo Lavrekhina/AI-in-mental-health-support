@@ -36,16 +36,3 @@ src/aihms  reusable loading and cleaning utilities
 analysis  analysis steps that generate tables plots and narrative artifacts
 outputs  generated cleaned data figures and story files
 
-### Notes
-
-The code is schema tolerant
-If your dataset includes extra columns such as Sentiment_score_after or Reported_emotion_after then the later steps will use them
-
-### Troubleshooting
-
-If Python crashes with an OpenMP error during numpy or pandas import then set these environment variables and rerun
-export KMP_DISABLE_SHM=1
-export OMP_NUM_THREADS=1
-export MKL_NUM_THREADS=1
-
-If it still fails try a fresh virtual environment and reinstall requirements
