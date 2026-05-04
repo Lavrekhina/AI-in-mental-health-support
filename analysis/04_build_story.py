@@ -9,7 +9,7 @@ from analysis._bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
 
-from aihms.data import load_interactions
+from src.aihms.data import load_interactions
 
 
 def _read_sectioned_csv(path: Path) -> dict[str, pd.DataFrame]:
@@ -131,7 +131,13 @@ def main() -> None:
         lines.append("Emotion prevalence metrics were not found (run step 2).\n")
 
     lines.append("Emotion prevalence (bar):\n")
-    lines.append("- `outputs/figures/emotion_prevalence_bar.png`\n")
+    bar_art = fig / "emotion_prevalence_annotated.png"
+    bar_rel = (
+        "outputs/figures/emotion_prevalence_annotated.png"
+        if bar_art.exists()
+        else "outputs/figures/emotion_prevalence_bar.png"
+    )
+    lines.append(f"- `{bar_rel}`\n")
     lines.append("Emotion cloud (wordcloud):\n")
     lines.append("- `outputs/figures/emotion_wordcloud.png`\n")
 
@@ -192,12 +198,23 @@ def main() -> None:
         lines.append(
             "Top groups by **share of high distress** (aggregated by age × response × emotion; not individuals):\n"
         )
+        disp = top.rename(
+            columns={
+                "User_age_group": "Age",
+                "AI_response_classification": "AI reply",
+                "Reported_emotion": "Emotion",
+                "mean_sentiment": "Mean sentiment",
+                "share_high_distress": "Share high distress",
+                "mean_delta": "Mean change",
+                "delta_mode": "Mode",
+            }
+        )
         try:
-            lines.append(top.to_markdown(index=False))
+            lines.append(disp.to_markdown(index=False))
         except ImportError:
             # `to_markdown()` requires optional `tabulate`. Fall back to a plain fixed-width table.
             lines.append("```")
-            lines.append(top.to_string(index=False))
+            lines.append(disp.to_string(index=False))
             lines.append("```")
         lines.append("\n")
         lines.append(f"Full table: `{risk_path.as_posix()}`\n")
@@ -214,36 +231,6 @@ def main() -> None:
     )
     if step03_notes.exists():
         lines.append(f"Run mode details: `{step03_notes.as_posix()}`\n")
-
-    # Checklist of required artifacts (helps verify completeness before submission)
-    expected = [
-        "outputs/figures/emotion_prevalence_bar.png",
-        "outputs/figures/emotion_wordcloud.png",
-        "outputs/figures/followup_by_response_stacked.png",
-        "outputs/figures/followup_by_response_interactive.html",
-        "outputs/figures/sentiment_before_after_by_response.png",
-        "outputs/figures/sentiment_before_after_by_response_PROXY.png",
-        "outputs/figures/emotion_transition_sankey.html",
-        "outputs/figures/emotion_transition_sankey_PROXY.html",
-        "outputs/figures/extreme_negative_sentiment_scatter.png",
-        "outputs/figures/agegroup_sentiment_shift.png",
-        "outputs/figures/agegroup_sentiment_shift_PROXY.png",
-    ]
-    missing = [p for p in expected if not (repo_root / p).exists()]
-    checklist_path = outputs / "story_checklist.txt"
-    checklist_path.write_text(
-        "Required artifacts checklist\n"
-        + "\n".join([f"[{'x' if (repo_root/p).exists() else ' '}] {p}" for p in expected])
-        + "\n",
-        encoding="utf-8",
-    )
-    lines.append("### Submission checklist\n")
-    lines.append(f"- Generated checklist: `{checklist_path.as_posix()}`\n")
-    if missing:
-        lines.append("Missing artifacts right now (run the relevant steps to generate them):\n")
-        lines.extend([f"- `{p}`\n" for p in missing])
-    else:
-        lines.append("All expected artifacts are present.\n")
 
     lines.append("### Appendix: full reproducible code\n")
     lines.append("- `analysis/01_data_overview.py`\n")

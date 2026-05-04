@@ -3,6 +3,8 @@ numpy
 matplotlib
 seaborn
 plotly
+kaleido
 wordcloud
 markdown
 tabulate
+python-docx

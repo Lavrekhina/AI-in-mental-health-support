@@ -6,7 +6,7 @@ from analysis._bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
 
-from aihms.data import load_interactions
+from src.aihms.data import load_interactions
 
 
 def main() -> None:

@@ -13,8 +13,8 @@ from analysis._bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
 
-from aihms.data import EMOTION_CANONICAL_ORDER, RESPONSE_CANONICAL_ORDER, load_interactions
-from aihms.viz import EmotionTheme, apply_mpl_theme
+from src.aihms.data import EMOTION_CANONICAL_ORDER, RESPONSE_CANONICAL_ORDER, load_interactions
+from src.aihms.viz import EmotionTheme, apply_mpl_theme
 
 
 def _ensure_dirs(repo_root: Path) -> tuple[Path, Path]:
@@ -211,6 +211,12 @@ def sankey_emotion_transition(fig_dir: Path, df: pd.DataFrame, mode: str) -> Pat
 
     out = fig_dir / ("emotion_transition_sankey.html" if mode == "observed" else "emotion_transition_sankey_PROXY.html")
     fig.write_html(out, include_plotlyjs="cdn")
+    png_out = out.with_suffix(".png")
+    try:
+        fig.write_image(str(png_out), width=1280, height=720, scale=2)
+    except Exception:
+        # Optional: requires `kaleido` (see requirements.txt). HTML export always works.
+        pass
     return out
 
 

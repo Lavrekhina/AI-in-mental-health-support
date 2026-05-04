@@ -30,7 +30,7 @@ class EmotionTheme:
         "#3b82f6",  # anxious (blue)
         "#60a5fa",  # overwhelmed
         "#93c5fd",  # stressed
-        "#94a3b8",  # sad (neutral slate)
+        "#475569",  # sad — darker slate so label/bar stays readable on light background
         "#a78bfa",  # lonely (lavender)
         "#34d399",  # calm (green)
         "#fbbf24",  # hopeful (warm amber)

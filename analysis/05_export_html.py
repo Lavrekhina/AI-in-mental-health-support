@@ -23,7 +23,7 @@ CSS = """
   --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 html,body{background:var(--bg); color:var(--text); font-family:var(--sans); line-height:1.55;}
-main{max-width: 940px; margin: 40px auto; padding: 0 18px;}
+main{max-width: min(1100px, calc(100vw - 36px)); margin: 40px auto; padding: 0 18px;}
 section{background:var(--card); border:1px solid var(--grid); border-radius:14px; padding: 18px 20px; margin: 14px 0;}
 h2{font-size: 1.5rem; margin: 0 0 12px 0;}
 h3{font-size: 1.15rem; margin: 18px 0 8px 0;}
@@ -38,6 +38,38 @@ img{max-width:100%; border:1px solid var(--grid); border-radius: 12px; backgroun
 .pill{display:inline-block; padding: 2px 10px; border-radius: 999px; background: rgba(43,108,176,0.10); color: var(--calm); border: 1px solid rgba(43,108,176,0.20); font-size: 0.9rem;}
 .danger{background: rgba(185,28,28,0.08); border-color: rgba(185,28,28,0.20); color: var(--distress);}
 .embed{width:100%; height: 560px; border: 1px solid var(--grid); border-radius: 12px; background: #fff;}
+.table-wrap{
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 14px -8px;
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--grid);
+  background: var(--card);
+}
+.table-wrap table{
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  width: max-content;
+  max-width: none;
+}
+.table-wrap thead th{
+  background: #f9fafb;
+  white-space: nowrap;
+}
+.table-wrap th,
+.table-wrap td{
+  border: 1px solid var(--grid);
+  padding: 6px 10px;
+  vertical-align: top;
+  text-align: left;
+}
+.table-wrap tbody td{
+  word-break: break-word;
+}
+.table-wrap tbody td:last-child{
+  white-space: nowrap;
+}
 """
 
 
@@ -71,6 +103,17 @@ def _inject_embeds(repo_root: Path, html: str) -> str:
     return html
 
 
+def _wrap_tables(html: str) -> str:
+    """Wide markdown tables need horizontal scroll inside the narrow main column."""
+    import re
+
+    return re.sub(
+        r"(<table(?:\s[^>]*)?>[\s\S]*?</table>)",
+        r'<div class="table-wrap">\1</div>',
+        html,
+    )
+
+
 def _inject_images(repo_root: Path, html: str) -> str:
     """
     Convert code-references to png paths into inline images.
@@ -78,7 +121,8 @@ def _inject_images(repo_root: Path, html: str) -> str:
     """
     import re
 
-    pattern = re.compile(r"<code>(outputs/figures/[^<]+?\\.png)</code>")
+    # Literal `.png` only — avoid `\\.png` here (that wrongly requires a backslash before the dot).
+    pattern = re.compile(r"<code>(outputs/figures/[^<]+\.png)</code>")
 
     def repl(m: re.Match[str]) -> str:
         path_repo = m.group(1)  # e.g. outputs/figures/foo.png
@@ -110,6 +154,7 @@ def main() -> None:
     body = body.replace("<h3>", "</section><section><h3>")
     body = body + "</section>"
 
+    body = _wrap_tables(body)
     body = _inject_images(repo_root, body)
     body = _inject_embeds(repo_root, body)
 

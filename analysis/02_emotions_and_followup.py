@@ -12,13 +12,13 @@ from analysis._bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
 
-from aihms.data import (
+from src.aihms.data import (
     EMOTION_CANONICAL_ORDER,
     FOLLOWUP_CANONICAL_ORDER,
     RESPONSE_CANONICAL_ORDER,
     load_interactions,
 )
-from aihms.viz import EmotionTheme, apply_mpl_theme
+from src.aihms.viz import EmotionTheme, apply_mpl_theme
 
 
 def _ensure_dirs(repo_root: Path) -> tuple[Path, Path]:
@@ -94,6 +94,9 @@ def plot_emotion_prevalence(fig_dir: Path, df: pd.DataFrame, theme: EmotionTheme
     ax.set_title("What emotions are most common among users seeking help?")
     ax.set_xlabel("Reported emotion (normalized)")
     ax.set_ylabel("Number of interactions")
+    for patch in ax.patches:
+        patch.set_edgecolor("#334155")
+        patch.set_linewidth(0.85)
 
     # Gentle annotation — top emotion only, avoids clutter.
     top_emotion = counts.idxmax()
@@ -118,14 +121,24 @@ def plot_emotion_prevalence(fig_dir: Path, df: pd.DataFrame, theme: EmotionTheme
 def plot_emotion_wordcloud(fig_dir: Path, df: pd.DataFrame, theme: EmotionTheme) -> Path:
     freqs = df["Reported_emotion"].value_counts().to_dict()
 
+    emotion_colors = {
+        e: theme.emotion_palette[i]
+        for i, e in enumerate(EMOTION_CANONICAL_ORDER)
+        if i < len(theme.emotion_palette)
+    }
+
+    def _wc_color(word: str, font_size: float, position, orientation, random_state=None, **kwargs: object) -> str:
+        return emotion_colors.get(str(word).lower(), theme.text)
+
     wc = WordCloud(
         width=1200,
         height=600,
         background_color=theme.background,
-        colormap="Blues",
         prefer_horizontal=0.85,
         normalize_plurals=False,
         random_state=13,
+        color_func=_wc_color,
+        min_font_size=14,
     ).generate_from_frequencies(freqs)
 
     fig, ax = plt.subplots(figsize=(12, 6))
