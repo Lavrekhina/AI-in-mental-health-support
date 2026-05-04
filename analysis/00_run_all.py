@@ -12,6 +12,7 @@ STEPS = [
     "analysis.04_build_story",
     "analysis.05_export_html",
     "analysis.06_export_appendix",
+    "analysis.07_palette_reference",
 ]
 
 

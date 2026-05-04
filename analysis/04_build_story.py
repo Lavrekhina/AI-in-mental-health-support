@@ -222,10 +222,22 @@ def main() -> None:
         lines.append("Risk group table not found (run step 3).\n")
 
     lines.append("### Limitations & ethics (important)\n")
+    if "Sentiment_score_after" in df.columns:
+        proxy_vs_observed = (
+            "- **Proxy vs observed**: In the CSV I used for this project, `Sentiment_score_after` is present, so the sentiment-shift parts of the pipeline run in **observed** mode. "
+            "If I extend this work later, I would still make sure every dataset includes comparable after-interaction fields (sentiment and, where possible, `Reported_emotion_after`) "
+            "so any claims about change stay tied to measured values rather than estimates.\n"
+        )
+    else:
+        proxy_vs_observed = (
+            "- **Proxy vs observed**: The CSV supplied for this coursework does **not** include `Sentiment_score_after` (or `Reported_emotion_after`), so the project uses a clearly labeled **proxy** after-sentiment for demonstration only. "
+            "From my perspective that is fine for showing the workflow, but for stronger conclusions in future work I would insist on **observed** after-columns—collected in the study design—before I would trust before/after sentiment or transition plots as evidence of real change.\n"
+        )
     lines.append(
         "- **Not clinical outcomes**: sentiment and “returned / dropped / escalated” are proxies, not diagnoses or treatment success.\n"
-        "- **Proxy vs observed**: if your CSV lacks `Sentiment_score_after`, the project can run a **proxy** after-sentiment for demonstration. "
-        "For final conclusions, prefer the **observed** after-columns.\n"
+    )
+    lines.append(proxy_vs_observed)
+    lines.append(
         "- **Aggregation first**: “at‑risk groups” are computed at group level (age × response × emotion), not individuals.\n"
         "- **Ethical emphasis**: extreme-negative visual highlights a statistical tail (lowest 5%) without labels to reduce stigma.\n"
     )
@@ -333,11 +345,21 @@ def main() -> None:
         plain.append(_clean_plain("Risk group table not found. Run step 3 to generate it.\n"))
 
     plain.append("LIMITATIONS AND ETHICS\n")
+    if "Sentiment_score_after" in df.columns:
+        proxy_plain = (
+            "The CSV I used includes Sentiment_score_after so sentiment shifts are observed in this run. "
+            "For future work I would still aim to always have after interaction measures in the study design. "
+        )
+    else:
+        proxy_plain = (
+            "The CSV I was given does not include Sentiment_score_after so proxy after sentiment is used only for demonstration. "
+            "For my own future analyses I would want observed after columns before treating results as strong evidence. "
+        )
     plain.append(
         _clean_plain(
             "Sentiment scores and follow up outcomes are proxies and do not represent diagnoses or treatment success. "
-            "When after columns are missing, proxy mode is for demonstration and should not be used for strong conclusions. "
-            "All reporting should remain calm, non sensational, and privacy preserving.\n"
+            + proxy_plain
+            + "All reporting should remain calm, non sensational, and privacy preserving.\n"
         )
     )
 
